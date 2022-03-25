@@ -7,9 +7,9 @@ LATEST := ${NAME}:latest
 POSTMAN_DIR = ./docs
 POSTMAN_FILE = upload.postman_collection.json
 
-default: build push
+default: build 
 
-all: clean_rights clean build push
+all: clean_rights clean build 
 
 build:
 	@echo "Build the docker image"
@@ -33,11 +33,28 @@ token:
 	@echo "Done!"
 	# echo $TOKEN #you can use this to confirm if variable has been set
 
+# Use this instead of the containerized image
 run:
 	@echo "Start the application server"
 	go run main.go
 
-run_postman:
+run_postman: token
 	@echo "Run the postman collection"
 	@newman run ${POSTMAN_DIR}/${POSTMAN_FILE}
 
+# 
+# FIXME: When running via the docker image, failing test
+#
+#  #   failure                  detail
+#  1.  AssertionError          Status code is 200
+#                              expected response to have status code 200 but got 403
+#                              at assertion:0 in test-script
+#                              inside "Upload an Image"
+
+#  2.  AssertionError          Status code is 200
+#                              expected response to have status code 200 but got 404
+#                              at assertion:0 in test-script
+#                              inside "Home Page / Landing Page"
+run_img:
+	@echo "Run the image upload service"
+	@docker run -it -p 8081:8081 czaring/image-upload:0.0.1
