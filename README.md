@@ -44,8 +44,7 @@ What you will need?
 2. Or you can use IntelliJ and install GO plugin (_GO and GO Linter_)
 2. [Go language](https://jimkang.medium.com/install-go-on-mac-with-homebrew-5fa421fc55f5)
 3. Docker Desktop
-5. Install newman 
-   + `npm install -g newman`
+5. Newman
 
 # Let's GO!
   Clone the project
@@ -63,6 +62,7 @@ Go to the project directory
 Install dependencies
 
 ```bash
+  npm install -g newman
   brew install --cask docker
   docker run -d -it -p 27017:27017 mongo
 ```
