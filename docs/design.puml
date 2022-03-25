@@ -1,0 +1,43 @@
+@startuml
+autonumber
+
+title "Sample Use Case for Image Upload Service"
+
+actor "User" as u
+boundary "Image Upload Service" as img
+
+u -> img: get the auth token
+activate u #Darkorange
+u -> img : uploads an image thru POST /upload
+deactivate u  
+activate img #Darkorange
+
+note right    
+    * REQUIRED: Input Validation and Auth
+
+    * FOR REVIEW 
+    Consider implementing idempotent call 
+    as we don't want duplicate records 
+    being uploaded and flooding the storage
+
+end note
+
+alt Valid File and Auth 
+    create database NoSql as db
+    img -> db : save image metadata and relevant HTTP info
+    activate db #Darkorange
+        img <-- db : successfully saved
+   deactivate db
+   note right    
+    * If we need to store the file, we can probably utilize S3 
+    depending on the business needs or constraints; currently stored in a tmp folder
+  end note
+else Error Encountered: File Size Exceeded, Invalid File Type, and Invalid Auth
+        u X<-- img : HTTP 400 Bad Request
+        u X<-- img : HTTP 403 Unauthorized or Forbidden Access
+        u X<-- img : HTTP 415 Unsupported Media
+        u X<-- img : HTTP 500 Internal Server
+end
+u <-- img : success
+deactivate img
+@enduml
