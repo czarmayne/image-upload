@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Image Upload</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Image Upload</h1>
+        <button class="btn btn-outline-secondary" type="button" id="fake_token">Generate Fake Token</button>
+        <div class="input-group mb-3 mt-3">
+            <form action="#" id="form" method="GET" role="form" enctype="multipart/form-data"></form>
+            <input type="hidden" id="auth" value="" />
+            <div class="input-group-append">
+                <input type="file" class="form-control" placeholder="file" id="file">
+                <button class="btn btn-outline-secondary" type="submit" id="btn_upload">Upload</button>
+            </div>
+        </form>
+    </div>
+    <div class="row" id="disp"></div>
+    <pre id="raw" style="border:1px solid black;"></pre>
+    <p id="msg"></p>
+    </div>
+</body>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+  <script>
+    $(document).ready(function(){
+        $.ajax({
+            url: "http://localhost:8081/token" // get the token from application server
+        }).done(function (data) {
+            // console.log(data); // for testing only
+            $("#auth").val(data); // this will set hidden field value
+        });
+
+        // To revert to the original token, simply refresh the page
+        $('#fake_token').on('click', function () {
+            $("#auth").val("fake_token"); // this will set hidden field value of auth to a fake token to simulate forbidden access
+        });
+
+
+        $('#btn_upload').on('click', function () {
+            var file_data = $('#file')[0].files; // get the uploaded file data
+            var token = $('#auth').val(); // get the token
+            var form_data = new FormData();
+            
+            // Can be used for FE validation on the size and if auth has a value
+            // if((file_data.length > 0 && file_data[0].size <= 8388608) && token != ""){
+                
+                // Check file selected or not
+                if(file_data.length > 0){
+                    console.log("Start uploading the file to the server...");
+                    
+                // add the file and token in the request
+                form_data.append('file',file_data[0]);
+                form_data.append('auth', token);
+
+                // For debugging only, check the appended key/value pairs
+                for (var pair of form_data.entries()) {
+                    console.log(pair[0]+ ', ' + pair[1]); 
+                }
+                
+                $.ajax({
+                    url: 'http://localhost:8081/upload', // post image to server
+                    dataType: 'text', // server response
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: form_data,
+                    type: 'post',
+                    success: function (response) {
+                        $('#msg').html(response); // display success response from the server
+                    },
+                    error: function (response) {
+                        $('#msg').html(response.responseText); // display error response from the server
+                    }
+                });
+            }
+            // Can be used for FE validation on the file size 
+            // else if (file_data.length > 0 && file_data[0].size > 8388608){            
+            //     alert('File exceeds the size limit');
+            // } 
+            else {
+                alert("Please select a file.");
+            }
+        });
+
+    });
+
+  </script>
+</html>
